@@ -28,6 +28,15 @@ No build step, no framework, no backend. Recreates social-styles.firebaseapp.com
 Serve locally (`python -m http.server` in this folder) and walk the flow, or just push and
 load the live URL. Scoring logic was validated by driving all four corners of the grid.
 
-## Not done yet
-Results only come back via the employee clicking "Email my result back" (mailto). No automatic
-collection — see ROADMAP.md.
+## Team board
+- Opt-in "Add me to the team board" plots everyone as a colored dot + name on the 2×2 grid.
+- Storage layer is the `store` object in index.html: uses **Firebase Firestore** if
+  `FIREBASE_CONFIG.projectId` is set, else **local demo mode** (localStorage + seeded sample dots).
+- To go live/shared: fill `FIREBASE_CONFIG` (see README "Team board" for the 5-min setup + rules).
+- `renderBoard()` de-dupes by lowercased name (latest `createdAt` wins) and jitters overlapping dots.
+- Demo seed data is written once to `localStorage['ss_results']` (key `ss_seeded`); it never shows
+  once Firebase is connected (that path reads Firestore instead).
+
+## Still open
+"Email my result back" is mailto (unreliable on webmail). The team board is the real collection
+path once Firebase is connected — see ROADMAP.md for further ideas.

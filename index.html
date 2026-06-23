@@ -239,6 +239,22 @@
   .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .footer-note{margin-top:30px;font-size:12.5px;color:var(--ink-faint);max-width:60ch}
 
+  /* ---------- team board ---------- */
+  .matrix .dots{position:absolute;inset:0;z-index:4;pointer-events:none}
+  .bdot{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:auto;animation:bpop .5s cubic-bezier(.2,.9,.2,1) both}
+  @keyframes bpop{from{opacity:0;transform:translate(-50%,-50%) scale(.4)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+  .bdot{transform:translate(-50%,-50%)}
+  .bdot:hover{z-index:20}
+  .bd-pt{width:13px;height:13px;border-radius:50%;background:var(--c,#999);border:2.5px solid #fff;box-shadow:0 2px 7px rgba(33,31,26,.32)}
+  .bd-nm{font-size:10px;font-weight:700;color:var(--ink);background:rgba(251,247,238,.85);padding:1px 6px;border-radius:7px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(33,31,26,.12)}
+  .bdot.mine{z-index:15}
+  .bdot.mine .bd-pt{width:18px;height:18px;box-shadow:0 0 0 3px var(--c),0 3px 9px rgba(33,31,26,.4)}
+  .bdot.mine .bd-nm{background:var(--ink);color:#fbf7ee}
+  .board-legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+  .board-legend span{display:inline-flex;align-items:center;gap:6px}
+  .board-legend i{width:10px;height:10px;border-radius:50%}
+  .board-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint);font-size:13px;padding:24px}
+
   @media print{
     body{background:#fff}
     body::before,.topbar,.actions,.namefield{display:none!important}
@@ -326,22 +342,68 @@
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" id="email">✉ Email my result back</button>
+      <button class="btn btn-primary" id="addMe">➕ Add me to the team board</button>
+      <button class="btn btn-ghost" id="viewBoard">👥 View team board</button>
+      <button class="btn btn-ghost" id="email">✉ Email my result back</button>
       <button class="btn btn-ghost" id="print">⎙ Save as PDF</button>
       <button class="btn btn-ghost" id="copy">⧉ Copy summary</button>
       <button class="btn btn-ghost" id="retake">↻ Retake</button>
     </div>
-    <p class="footer-note">Social Styles model by David Merrill & Roger Reid. This is a quick self-perception snapshot for team awareness — not a clinical or hiring instrument. Your answers stay in your browser unless you choose to email them.</p>
+    <p class="footer-note">Social Styles model by David Merrill & Roger Reid. This is a quick self-perception snapshot for team awareness — not a clinical or hiring instrument. Your answers stay in your browser unless you email them or choose to add yourself to the team board.</p>
+  </section>
+
+  <!-- ============ TEAM BOARD ============ -->
+  <section id="board" class="screen">
+    <p class="eyebrow">Team board</p>
+    <h2 class="result-name" style="font-size:clamp(34px,7vw,58px);margin-bottom:6px">Your team's styles</h2>
+    <p class="result-tag"><b id="boardCount">0</b> on the board · <span id="boardMode"></span></p>
+    <div class="grid-card">
+      <div class="matrix-shell">
+        <div class="y-axis"><span>Controls emotion</span><span>Shows emotion</span></div>
+        <div class="matrix" id="boardMatrix">
+          <div class="quad tl" style="--qc:var(--analytical)"><div class="q-name">Analytical</div></div>
+          <div class="quad tr" style="--qc:var(--driving)"><div class="q-name">Driving</div></div>
+          <div class="quad bl" style="--qc:var(--amiable)"><div class="q-name">Amiable</div></div>
+          <div class="quad br" style="--qc:var(--expressive)"><div class="q-name">Expressive</div></div>
+          <div class="dots" id="boardDots"></div>
+        </div>
+        <div class="x-axis"><span>Asks ◂ less assertive</span><span>more assertive ▸ tells</span></div>
+      </div>
+      <div class="board-legend">
+        <span><i style="background:var(--analytical)"></i>Analytical</span>
+        <span><i style="background:var(--driving)"></i>Driving</span>
+        <span><i style="background:var(--amiable)"></i>Amiable</span>
+        <span><i style="background:var(--expressive)"></i>Expressive</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="backToResult">← My result</button>
+      <button class="btn btn-ghost" id="refreshBoard">↻ Refresh</button>
+    </div>
   </section>
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 (function(){
   "use strict";
 
   // ====== where the "Email my result" button sends to — change if needed ======
   var SEND_RESULTS_TO = "daniele@internsinasia.com";
+
+  // ====== TEAM BOARD storage =================================================
+  // Paste your Firebase web config below to collect everyone's results into ONE
+  // shared board. Leave projectId blank to run in local demo mode (this browser
+  // only, with sample dots). See README for the 5-minute setup.
+  var FIREBASE_CONFIG = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    appId: ""
+  };
+  // ===========================================================================
 
   // axis: 'A' = assertiveness (left=asks/low, right=tells/high)
   //       'R' = responsiveness (left=controls/low, right=shows/high)
@@ -550,6 +612,126 @@
   });
 
   $("#print").addEventListener("click",function(){window.print()});
+
+  // ===================== TEAM BOARD =====================
+  var STYLE_COLOR = {Analytical:'var(--analytical)', Driving:'var(--driving)', Amiable:'var(--amiable)', Expressive:'var(--expressive)'};
+  var myDocId = localStorage.getItem('ss_myDoc') || null;
+  var myName  = localStorage.getItem('ss_myName') || null;
+
+  var store = (function(){
+    var configured = !!(window.firebase && FIREBASE_CONFIG && FIREBASE_CONFIG.projectId);
+    var db = null;
+    if(configured){
+      try { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.firestore(); }
+      catch(e){ configured = false; }
+    }
+    return {
+      configured: configured,
+      add: function(rec){
+        if(configured){
+          rec.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          return db.collection('results').add(rec).then(function(r){ return r.id; });
+        }
+        rec.createdAt = Date.now();
+        rec._id = 'local-' + rec.createdAt;
+        var all = JSON.parse(localStorage.getItem('ss_results') || '[]');
+        all.push(rec); localStorage.setItem('ss_results', JSON.stringify(all));
+        return Promise.resolve(rec._id);
+      },
+      subscribe: function(cb){
+        if(configured){
+          return db.collection('results').orderBy('createdAt','asc').onSnapshot(function(snap){
+            var arr=[]; snap.forEach(function(d){ var x=d.data(); x._id=d.id; arr.push(x); }); cb(arr);
+          }, function(){ cb([]); });
+        }
+        cb(JSON.parse(localStorage.getItem('ss_results') || '[]'));
+        return function(){};
+      }
+    };
+  })();
+
+  // seed sample dots so the board is visible before Firebase is connected
+  if(!store.configured && !localStorage.getItem('ss_seeded')){
+    localStorage.setItem('ss_results', JSON.stringify([
+      {name:'Ploy',    style:'Expressive', a:6.6, r:6.9, createdAt:1, _id:'seed1'},
+      {name:'James',   style:'Driving',    a:7.1, r:2.5, createdAt:2, _id:'seed2'},
+      {name:'Anong',   style:'Amiable',    a:2.5, r:6.4, createdAt:3, _id:'seed3'},
+      {name:'Kevin',   style:'Analytical', a:2.4, r:2.8, createdAt:4, _id:'seed4'},
+      {name:'Mai',     style:'Expressive', a:5.3, r:5.6, createdAt:5, _id:'seed5'},
+      {name:'Somchai', style:'Analytical', a:3.9, r:3.3, createdAt:6, _id:'seed6'}
+    ]));
+    localStorage.setItem('ss_seeded','1');
+  }
+
+  function tms(c){ return (c && c.seconds!=null) ? c.seconds*1000 : (typeof c==='number' ? c : 0); }
+  function hashStr(s){ var h=0,i; for(i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return Math.abs(h); }
+  function jitter(name){ var h=hashStr(name||'x'); return { x:((h%100)/100-0.5)*4.5, y:((Math.floor(h/100)%100)/100-0.5)*4.5 }; }
+  function clampPct(v){ return Math.max(2.5, Math.min(97.5, v)); }
+
+  function renderBoard(list){
+    var byName={};
+    list.forEach(function(r){
+      var k=(r.name||'').trim().toLowerCase(); if(!k) return;
+      var t=tms(r.createdAt);
+      if(!byName[k] || t>=byName[k]._t){ r._t=t; r._k=k; byName[k]=r; }
+    });
+    var people = Object.keys(byName).map(function(k){ return byName[k]; });
+    var layer = $("#boardDots"); layer.innerHTML='';
+    if(!people.length){
+      var e=document.createElement('div'); e.className='board-empty';
+      e.textContent='No one yet — be the first to add yourself.'; layer.appendChild(e);
+    }
+    people.forEach(function(r){
+      var j=jitter(r.name);
+      var x=clampPct((r.a-1)/7*100 + j.x), y=clampPct((r.r-1)/7*100 + j.y);
+      var mine = (myDocId && r._id===myDocId) || (myName && r._k===myName);
+      var el=document.createElement('div'); el.className='bdot' + (mine?' mine':'');
+      el.style.left=x+'%'; el.style.top=y+'%'; el.style.setProperty('--c', STYLE_COLOR[r.style]||'#999');
+      el.title = r.name + ' · ' + r.style;
+      var pt=document.createElement('span'); pt.className='bd-pt';
+      var nm=document.createElement('span'); nm.className='bd-nm'; nm.textContent = r.name + (mine?' (you)':'');
+      el.appendChild(pt); el.appendChild(nm); layer.appendChild(el);
+    });
+    $("#boardCount").textContent = people.length;
+  }
+
+  var boardUnsub=null;
+  function showBoard(){
+    if(store.configured){ if(!boardUnsub) boardUnsub = store.subscribe(renderBoard); }
+    else { renderBoard(JSON.parse(localStorage.getItem('ss_results') || '[]')); }
+    $("#boardMode").textContent = store.configured
+      ? 'updates live as people finish'
+      : 'demo mode — saved to this browser only until Firebase is connected';
+    show('board');
+  }
+
+  $("#viewBoard").addEventListener('click', showBoard);
+  $("#backToResult").addEventListener('click', function(){ show('results'); });
+  $("#refreshBoard").addEventListener('click', function(){
+    if(!store.configured) renderBoard(JSON.parse(localStorage.getItem('ss_results') || '[]'));
+  });
+
+  $("#addMe").addEventListener('click', function(){
+    if(!RESULT) return;
+    var b=this;
+    var nm=(RESULT.name||'').trim();
+    if(!nm){
+      nm=(window.prompt('Your name for the team board:')||'').trim();
+      if(!nm) return;
+      RESULT.name=nm; $("#name").value=nm;
+      $("#resultFor").textContent = nm.toUpperCase()+' — YOUR RESULT';
+    }
+    b.disabled=true; b.textContent='Adding…';
+    store.add({ name:nm, style:RESULT.style, a:Math.round(RESULT.A*100)/100, r:Math.round(RESULT.R*100)/100 })
+      .then(function(id){
+        myDocId=id; myName=nm.toLowerCase();
+        localStorage.setItem('ss_myDoc', id); localStorage.setItem('ss_myName', myName);
+        b.textContent="✓ You're on the board";
+        showBoard();
+      })
+      .catch(function(){ b.disabled=false; b.textContent="Couldn't add — retry"; });
+  });
+  // ===================== /TEAM BOARD =====================
 
   updateProgress();
 })();

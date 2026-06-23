@@ -24,6 +24,48 @@ To change the destination email, edit this line near the top of the `<script>` i
 var SEND_RESULTS_TO = "daniele@internsinasia.com";
 ```
 
+## Team board (shared results)
+
+The result page has an **"➕ Add me to the team board"** button. Everyone who opts in is plotted
+as a colored dot (by style) with their name on a shared 2×2 grid — great for a team workshop.
+
+**Out of the box it runs in local demo mode** (sample dots, saved only in that browser). To make
+the board real and shared across everyone, connect a free Firebase project — ~5 minutes, one time:
+
+1. Go to <https://console.firebase.google.com> → **Add project** (e.g. `social-style-board`).
+   Google Analytics can be off.
+2. In the project, click the **Web** icon `</>` → register an app → copy the `firebaseConfig` object.
+3. **Build → Firestore Database → Create database** → production mode → location `asia-southeast1`.
+4. Firestore **→ Rules** tab → paste the rules below → **Publish**:
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /results/{doc} {
+         allow read: if true;
+         allow create: if request.resource.data.name is string
+                       && request.resource.data.name.size() > 0
+                       && request.resource.data.name.size() < 60
+                       && request.resource.data.style is string
+                       && request.resource.data.a is number
+                       && request.resource.data.r is number;
+         allow update, delete: if false;
+       }
+     }
+   }
+   ```
+
+5. Paste the config values into `FIREBASE_CONFIG` near the top of the `<script>` in `index.html`
+   (`apiKey`, `authDomain`, `projectId`, `appId`), then commit + push. The board goes live and
+   updates in real time as people finish.
+
+Notes:
+- The Firebase web config is **not** a secret — it's meant to live in client code, safe to commit.
+- These rules let anyone with the link **read** the board (fine for an internal team tool) and
+  **create** a result, but never edit/delete. Lock down further later if needed.
+- Retakes just add a new entry; the board shows the latest result per name.
+
 ## How it scores
 
 - 10 paired statements, each rated 1–8.
