@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Social Style — Self-Assessment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A short self-assessment that maps your communication style: Analytical, Driving, Amiable, or Expressive.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     CONFIG — change this email to wherever results should go
+     ========================================================= */
+  :root{
+    --paper:#F4EEE2;
+    --paper-2:#EFE7D7;
+    --card:#FBF7EE;
+    --ink:#211F1A;
+    --ink-soft:#6A6256;
+    --ink-faint:#9A9183;
+    --line:#DCD2BF;
+    --line-strong:#C7BBA2;
+    --accent:#2B6F69;        /* form accent — calm teal */
+    --accent-soft:#cfe4e1;
+
+    /* the four social styles */
+    --analytical:#345E9E;    /* ask + controls */
+    --driving:#C0392B;       /* tell + controls */
+    --amiable:#3C8C5B;       /* ask + shows */
+    --expressive:#D98324;    /* tell + shows */
+
+    --shadow:0 1px 2px rgba(33,31,26,.04), 0 12px 32px -16px rgba(33,31,26,.22);
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    font-family:"Hanken Grotesk", system-ui, sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    background-image:
+      radial-gradient(1200px 600px at 12% -8%, #FBF7EC 0%, rgba(251,247,236,0) 55%),
+      radial-gradient(900px 520px at 100% 0%, #F0E7D4 0%, rgba(240,231,212,0) 50%);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  /* faint paper grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:clamp(20px,5vw,56px) clamp(18px,5vw,40px) 80px}
+
+  /* ---------- shared type ---------- */
+  .eyebrow{
+    font-size:12.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 14px;
+  }
+  h1{
+    font-family:"Fraunces", Georgia, serif;
+    font-weight:600;font-size:clamp(40px,8vw,76px);line-height:.98;
+    letter-spacing:-.02em;margin:0 0 18px;
+  }
+  h1 em{font-style:italic;font-weight:500}
+  .lede{font-size:clamp(16px,2.4vw,18.5px);color:var(--ink-soft);max-width:54ch;margin:0 0 22px}
+  .screen{display:none;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .screen.active{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* ---------- intro ---------- */
+  .intro-stack > *{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+  .intro-stack > *:nth-child(1){animation-delay:.02s}
+  .intro-stack > *:nth-child(2){animation-delay:.08s}
+  .intro-stack > *:nth-child(3){animation-delay:.16s}
+  .intro-stack > *:nth-child(4){animation-delay:.24s}
+  .intro-stack > *:nth-child(5){animation-delay:.32s}
+
+  .legend{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+    margin:6px 0 30px;padding:0;list-style:none;max-width:560px;
+  }
+  .legend li{
+    display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink-soft);
+    padding:13px 15px;background:var(--card);border:1px solid var(--line);border-radius:13px;
+  }
+  .legend b{color:var(--ink);font-weight:700}
+  .dot{width:11px;height:11px;border-radius:50%;margin-top:5px;flex:0 0 auto}
+
+  .namefield{margin:4px 0 26px;max-width:380px}
+  .namefield label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:7px;letter-spacing:.01em}
+  .namefield input{
+    width:100%;font:inherit;font-size:16px;padding:13px 15px;color:var(--ink);
+    background:var(--card);border:1px solid var(--line-strong);border-radius:12px;outline:none;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .namefield input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font:inherit;font-weight:700;font-size:15.5px;letter-spacing:.01em;cursor:pointer;
+    border:1px solid transparent;border-radius:999px;padding:14px 28px;
+    display:inline-flex;align-items:center;gap:10px;transition:transform .15s, box-shadow .2s, background .2s, opacity .2s;
+  }
+  .btn-primary{background:var(--ink);color:#FBF7EE;box-shadow:var(--shadow)}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.38;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+  .btn-ghost:hover{background:var(--card);transform:translateY(-1px)}
+  .btn .arrow{transition:transform .2s}
+  .btn-primary:not(:disabled):hover .arrow{transform:translateX(4px)}
+
+  /* ---------- assessment ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:5;margin:0 -40px 26px;padding:16px 40px;
+    background:linear-gradient(var(--paper) 72%, rgba(244,238,226,0));
+  }
+  @media(max-width:560px){.topbar{margin:0 -18px 22px;padding:14px 18px}}
+  .topbar-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:9px}
+  .topbar h2{font-family:"Fraunces",serif;font-weight:600;font-size:20px;margin:0;letter-spacing:-.01em}
+  .count{font-size:13.5px;font-weight:700;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .count b{color:var(--accent)}
+  .track{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+  .track > i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1)}
+
+  .hint{font-size:14px;color:var(--ink-soft);margin:0 0 22px}
+  .hint b{color:var(--ink)}
+
+  .item{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px 22px;margin-bottom:16px;scroll-margin-top:120px;
+    transition:border-color .25s, box-shadow .25s, background .25s;
+  }
+  .item.answered{border-color:var(--line);background:var(--card)}
+  .item.flash{animation:flash 1s ease}
+  @keyframes flash{0%,100%{box-shadow:none;border-color:var(--line)}30%{box-shadow:0 0 0 3px rgba(192,57,43,.18);border-color:var(--driving)}}
+  .item-num{font-size:12px;font-weight:700;color:var(--ink-faint);letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px}
+
+  .poles{display:flex;justify-content:space-between;gap:16px;margin-bottom:13px}
+  .pole{font-size:14.5px;font-weight:600;color:var(--ink);max-width:46%}
+  .pole.right{text-align:right}
+  .pole small{display:block;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+
+  .scale{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}
+  .scale button{
+    font:inherit;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer;
+    aspect-ratio:1/1;min-height:40px;border:1.5px solid var(--line-strong);border-radius:11px;
+    background:var(--paper-2);transition:transform .12s, background .15s, color .15s, border-color .15s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .scale button:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .scale button[aria-pressed="true"]{
+    background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 6px 16px -8px var(--accent);
+  }
+  @media(max-width:560px){
+    .scale{gap:5px}
+    .scale button{min-height:34px;font-size:12.5px;border-radius:9px}
+    .pole{font-size:13px;max-width:44%}
+  }
+
+  .submit-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:30px}
+  .submit-note{font-size:13.5px;color:var(--ink-soft)}
+
+  /* ---------- results ---------- */
+  .result-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .result-name{
+    font-family:"Fraunces",serif;font-weight:600;font-size:clamp(44px,9vw,84px);line-height:1;
+    letter-spacing:-.02em;margin:4px 0 6px;
+  }
+  .result-for{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft)}
+  .result-tag{font-size:clamp(16px,2.6vw,19px);color:var(--ink-soft);max-width:58ch;margin:0 0 28px}
+
+  .grid-card{
+    background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,30px);
+    box-shadow:var(--shadow);margin-bottom:26px;
+  }
+  .matrix-shell{display:grid;grid-template-columns:26px 1fr;grid-template-rows:1fr 26px;gap:8px}
+  .y-axis{
+    grid-column:1;grid-row:1;writing-mode:vertical-rl;transform:rotate(180deg);
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);padding:6px 0;
+  }
+  .x-axis{
+    grid-column:2;grid-row:2;display:flex;justify-content:space-between;align-items:center;
+    font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);padding:0 4px;
+  }
+  .matrix{
+    grid-column:2;grid-row:1;position:relative;aspect-ratio:1/1;width:100%;
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+    border-radius:14px;overflow:hidden;border:1.5px solid var(--line-strong);
+  }
+  .quad{position:relative;padding:14px;display:flex;flex-direction:column;transition:background .4s}
+  .quad .q-name{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(15px,3vw,20px);line-height:1.05}
+  .quad .q-sub{font-size:11px;font-weight:600;color:var(--ink-faint);letter-spacing:.04em;margin-top:3px}
+  .quad.tl{border-right:1.5px dashed var(--line-strong);border-bottom:1.5px dashed var(--line-strong)}
+  .quad.tr{border-bottom:1.5px dashed var(--line-strong)}
+  .quad.bl{border-right:1.5px dashed var(--line-strong)}
+  .quad.tr .q-name,.quad.br .q-name{text-align:right}
+  .quad.tr,.quad.br{align-items:flex-end}
+  .quad.bl,.quad.br{justify-content:flex-end}
+  .quad.win{box-shadow:inset 0 0 0 2.5px var(--qc)}
+  .quad .q-name{color:var(--ink)}
+  .quad.win .q-name{color:var(--qc)}
+
+  .marker{
+    position:absolute;width:20px;height:20px;border-radius:50%;
+    transform:translate(-50%,-50%) scale(0);
+    border:3px solid #fff;box-shadow:0 4px 14px rgba(33,31,26,.35);z-index:3;
+    transition:transform .7s cubic-bezier(.2,.9,.2,1) .25s;
+  }
+  .marker.show{transform:translate(-50%,-50%) scale(1)}
+  .marker::after{
+    content:"";position:absolute;inset:-9px;border-radius:50%;border:1.5px solid currentColor;opacity:.4;
+  }
+
+  .scores{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px}
+  .score{flex:1;min-width:150px;background:var(--paper-2);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+  .score .k{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+  .score .v{font-family:"Fraunces",serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:2px}
+  .score .d{font-size:13px;color:var(--ink-soft)}
+
+  .detail{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
+  @media(max-width:640px){.detail{grid-template-columns:1fr}.legend{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px}
+  .panel h3{font-family:"Fraunces",serif;font-weight:600;font-size:19px;margin:0 0 12px;letter-spacing:-.01em}
+  .panel.full{grid-column:1/-1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--paper-2);border:1px solid var(--line);color:var(--ink)}
+  .tips{margin:0;padding:0;list-style:none}
+  .tips li{position:relative;padding:7px 0 7px 26px;font-size:14.5px;color:var(--ink);border-bottom:1px solid var(--line)}
+  .tips li:last-child{border-bottom:0}
+  .tips li::before{content:"→";position:absolute;left:0;top:7px;color:var(--accent);font-weight:700}
+  .blurb{font-size:15px;color:var(--ink-soft);margin:0}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .footer-note{margin-top:30px;font-size:12.5px;color:var(--ink-faint);max-width:60ch}
+
+  @media print{
+    body{background:#fff}
+    body::before,.topbar,.actions,.namefield{display:none!important}
+    .wrap{max-width:none;padding:0}
+    .screen{display:none!important}
+    #results{display:block!important;animation:none}
+    .grid-card,.panel,.score{box-shadow:none;break-inside:avoid}
+    .marker.show{transform:translate(-50%,-50%) scale(1)!important}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ INTRO ============ -->
+  <section id="intro" class="screen active">
+    <div class="intro-stack">
+      <p class="eyebrow">A 2-minute self-assessment</p>
+      <h1>What's your<br><em>Social Style?</em></h1>
+      <p class="lede">Everyone communicates a little differently. This quick check maps how you come across on two dimensions — how much you <b>tell vs. ask</b>, and how much you <b>show vs. control</b> emotion — and places you in one of four styles. There are no better or worse styles; knowing yours just helps us work together better.</p>
+      <ul class="legend">
+        <li><span class="dot" style="background:var(--analytical)"></span><span><b>Analytical</b> — precise, logical, deliberate</span></li>
+        <li><span class="dot" style="background:var(--driving)"></span><span><b>Driving</b> — decisive, direct, results-first</span></li>
+        <li><span class="dot" style="background:var(--amiable)"></span><span><b>Amiable</b> — warm, supportive, easy-going</span></li>
+        <li><span class="dot" style="background:var(--expressive)"></span><span><b>Expressive</b> — energetic, social, big-picture</span></li>
+      </ul>
+      <div class="namefield">
+        <label for="name">Your name <span style="color:var(--ink-faint);font-weight:500">(optional — shown on your result)</span></label>
+        <input id="name" type="text" autocomplete="name" placeholder="e.g. Nicha S.">
+      </div>
+      <button class="btn btn-primary" id="start">Begin assessment <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ============ ASSESSMENT ============ -->
+  <section id="assessment" class="screen">
+    <div class="topbar">
+      <div class="topbar-row">
+        <h2>Where do you fall?</h2>
+        <span class="count"><b id="answered">0</b> / 10 answered</span>
+      </div>
+      <div class="track"><i id="bar"></i></div>
+    </div>
+    <p class="hint">For each row, pick the number closest to how you usually behave at work. <b>1</b> = fully the statement on the left, <b>8</b> = fully the statement on the right. Go with your gut.</p>
+    <div id="items"></div>
+    <div class="submit-row">
+      <button class="btn btn-primary" id="finish" disabled>See my result <span class="arrow">→</span></button>
+      <span class="submit-note" id="finishNote">Answer all 10 rows to continue.</span>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="results" class="screen">
+    <p class="result-for" id="resultFor"></p>
+    <div class="result-head">
+      <p class="eyebrow" style="margin:0">Your social style</p>
+    </div>
+    <h2 class="result-name" id="styleName"></h2>
+    <p class="result-tag" id="styleTag"></p>
+
+    <div class="grid-card">
+      <div class="matrix-shell">
+        <div class="y-axis"><span>Controls emotion</span><span>Shows emotion</span></div>
+        <div class="matrix" id="matrix">
+          <div class="quad tl" data-style="Analytical" style="--qc:var(--analytical)"><div class="q-name">Analytical</div><div class="q-sub">asks · controls</div></div>
+          <div class="quad tr" data-style="Driving" style="--qc:var(--driving)"><div class="q-name">Driving</div><div class="q-sub">tells · controls</div></div>
+          <div class="quad bl" data-style="Amiable" style="--qc:var(--amiable)"><div class="q-name">Amiable</div><div class="q-sub">asks · shows</div></div>
+          <div class="quad br" data-style="Expressive" style="--qc:var(--expressive)"><div class="q-name">Expressive</div><div class="q-sub">tells · shows</div></div>
+          <span class="marker" id="marker"></span>
+        </div>
+        <div class="x-axis"><span>Asks ◂ less assertive</span><span>more assertive ▸ tells</span></div>
+      </div>
+      <div class="scores">
+        <div class="score"><div class="k">Assertiveness</div><div class="v" id="aVal">–</div><div class="d" id="aDesc"></div></div>
+        <div class="score"><div class="k">Responsiveness</div><div class="v" id="rVal">–</div><div class="d" id="rDesc"></div></div>
+      </div>
+    </div>
+
+    <div class="detail">
+      <div class="panel full"><h3>What this means</h3><p class="blurb" id="styleBlurb"></p></div>
+      <div class="panel"><h3>Your strengths</h3><div class="chips" id="strengths"></div></div>
+      <div class="panel"><h3>Watch-outs under pressure</h3><p class="blurb" id="watchouts"></p></div>
+      <div class="panel full"><h3>How teammates can work best with you</h3><ul class="tips" id="tips"></ul></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="email">✉ Email my result back</button>
+      <button class="btn btn-ghost" id="print">⎙ Save as PDF</button>
+      <button class="btn btn-ghost" id="copy">⧉ Copy summary</button>
+      <button class="btn btn-ghost" id="retake">↻ Retake</button>
+    </div>
+    <p class="footer-note">Social Styles model by David Merrill & Roger Reid. This is a quick self-perception snapshot for team awareness — not a clinical or hiring instrument. Your answers stay in your browser unless you choose to email them.</p>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ====== where the "Email my result" button sends to — change if needed ======
+  var SEND_RESULTS_TO = "daniele@internsinasia.com";
+
+  // axis: 'A' = assertiveness (left=asks/low, right=tells/high)
+  //       'R' = responsiveness (left=controls/low, right=shows/high)
+  var ITEMS = [
+    {l:"Speaks slowly and deliberately",            r:"Speaks quickly",                                      axis:"A"},
+    {l:"Comes across as low-key, less animated",    r:"Animated — uses hands, face, body",                   axis:"R"},
+    {l:"Tends to ask questions; more reserved",     r:"Tends to make statements; tells",                     axis:"A"},
+    {l:"Keeps emotions in check",                   r:"Shows emotions openly",                               axis:"R"},
+    {l:"Soft-spoken",                               r:"Louder, fuller voice",                                axis:"A"},
+    {l:"Cool and measured with people",             r:"Warm and openly friendly",                            axis:"R"},
+    {l:"Leans back when stating an opinion",        r:"Leans forward / sits upright when stating an opinion",axis:"A"},
+    {l:"Uses little voice inflection; even tone",   r:"Uses lots of voice inflection",                       axis:"R"},
+    {l:"Takes time; can seem indecisive",           r:"Decisive; forms opinions quickly",                    axis:"A"},
+    {l:"Communicates facts and logic",              r:"Communicates feelings and emotions",                  axis:"R"}
+  ];
+
+  var STYLES = {
+    Analytical:{
+      color:"var(--analytical)",
+      tag:"You lead with logic. You like to be right, and you get there by gathering the facts and thinking it through before you commit.",
+      blurb:"Analyticals are precise, systematic and deliberate. You value accuracy and like to understand the whole picture before acting. You'd rather be thorough than fast, and you trust data over hunches. People rely on you to catch what others miss and to keep work disciplined and well-organised.",
+      strengths:["Thorough","Objective","Organised","Detail-oriented","Dependable","Level-headed"],
+      watchouts:"Under pressure you may over-analyse, delay decisions, or withdraw rather than push back. Others can read your reserve as coldness even when it isn't.",
+      tips:["Give me the details, data and context up front","Be accurate — half-answers erode trust","Don't rush me into a snap decision","Put things in writing so I can review them","Keep it professional; I warm up over time"]
+    },
+    Driving:{
+      color:"var(--driving)",
+      tag:"You lead with results. You're direct, decisive and happiest when things are moving and getting done.",
+      blurb:"Drivers are fast-paced, focused and goal-oriented. You make decisions quickly, take charge naturally, and cut to the point. You measure progress by outcomes, not process, and you'd rather own a decision than wait for perfect information. Teams count on you to set direction and keep momentum.",
+      strengths:["Decisive","Direct","Efficient","Independent","Results-driven","Confident"],
+      watchouts:"Under pressure you can become impatient, blunt, or controlling — moving so fast that people feel run over or unheard.",
+      tips:["Be brief, clear and to the point","Lead with the bottom line, then the why","Give me options and let me decide","Focus on results and timelines","Don't waste my time with long preambles"]
+    },
+    Amiable:{
+      color:"var(--amiable)",
+      tag:"You lead with relationships. You care how people feel, and you build trust, harmony and steady cooperation.",
+      blurb:"Amiables are warm, patient and supportive. You're an excellent listener, you put people at ease, and you value harmony and steady, dependable progress. You build loyalty and keep teams together, often quietly doing the work that holds everything in place. You prefer cooperation over conflict.",
+      strengths:["Supportive","Patient","Great listener","Loyal","Team-oriented","Diplomatic"],
+      watchouts:"Under pressure you may avoid conflict, go along with things you disagree with, or say 'yes' when you mean 'maybe' to keep the peace.",
+      tips:["Take a moment for the personal connection first","Be genuine and friendly, not pushy","Reassure me — change feels risky","Give me time to think; don't force a quick yes","Show how a decision affects the people involved"]
+    },
+    Expressive:{
+      color:"var(--expressive)",
+      tag:"You lead with energy and ideas. You're enthusiastic, persuasive and a natural at bringing people along with a vision.",
+      blurb:"Expressives are spontaneous, sociable and big-picture. You think out loud, generate ideas fast, and energise the room. You're persuasive and motivating, and you thrive on recognition and collaboration. People come to you when they need momentum, creativity, or someone to rally the team around a goal.",
+      strengths:["Enthusiastic","Persuasive","Creative","Sociable","Inspiring","Spontaneous"],
+      watchouts:"Under pressure you can get scattered, over-promise, or let emotion drive the moment — and lose interest once the exciting part is over.",
+      tips:["Match my energy — keep it lively","Talk the big picture before the fine print","Give recognition and let me share ideas","Help me turn the vision into concrete next steps","Keep things social, not strictly transactional"]
+    }
+  };
+
+  var $=function(s){return document.querySelector(s)};
+  var answers = new Array(ITEMS.length).fill(null);
+
+  // ---- build the items ----
+  var itemsBox=$("#items");
+  ITEMS.forEach(function(it,i){
+    var card=document.createElement("div");
+    card.className="item";
+    card.id="item-"+i;
+    var scale="";
+    for(var n=1;n<=8;n++){
+      scale+='<button type="button" data-i="'+i+'" data-v="'+n+'" aria-label="'+n+'">'+n+'</button>';
+    }
+    card.innerHTML=
+      '<div class="item-num">'+(i+1)+' of 10</div>'+
+      '<div class="poles"><div class="pole left">'+it.l+'</div>'+
+      '<div class="pole right">'+it.r+'</div></div>'+
+      '<div class="scale">'+scale+'</div>';
+    itemsBox.appendChild(card);
+  });
+
+  // ---- answering ----
+  itemsBox.addEventListener("click",function(e){
+    var b=e.target.closest("button[data-v]");
+    if(!b) return;
+    var i=+b.dataset.i, v=+b.dataset.v;
+    answers[i]=v;
+    var sib=b.parentNode.querySelectorAll("button");
+    sib.forEach(function(x){x.setAttribute("aria-pressed", x===b ? "true":"false")});
+    $("#item-"+i).classList.add("answered");
+    updateProgress();
+  });
+
+  function answeredCount(){return answers.filter(function(x){return x!==null}).length}
+  function updateProgress(){
+    var c=answeredCount();
+    $("#answered").textContent=c;
+    $("#bar").style.width=(c/ITEMS.length*100)+"%";
+    var done=c===ITEMS.length;
+    $("#finish").disabled=!done;
+    $("#finishNote").textContent=done ? "All set — let's see it." : (ITEMS.length-c)+" rows to go.";
+  }
+
+  // ---- navigation ----
+  function show(id){
+    document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active")});
+    $("#"+id).classList.add("active");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  $("#start").addEventListener("click",function(){show("assessment")});
+  $("#retake").addEventListener("click",function(){
+    answers=new Array(ITEMS.length).fill(null);
+    document.querySelectorAll(".scale button").forEach(function(b){b.setAttribute("aria-pressed","false")});
+    document.querySelectorAll(".item").forEach(function(c){c.classList.remove("answered")});
+    $("#marker").classList.remove("show");
+    updateProgress();
+    show("intro");
+  });
+
+  $("#finish").addEventListener("click",function(){
+    if(answeredCount()<ITEMS.length){
+      for(var i=0;i<answers.length;i++){if(answers[i]===null){
+        var el=$("#item-"+i);el.classList.add("flash");
+        el.scrollIntoView({behavior:"smooth",block:"center"});
+        setTimeout(function(){el.classList.remove("flash")},1100);
+        return;
+      }}
+    }
+    computeAndShow();
+  });
+
+  var RESULT=null;
+  function computeAndShow(){
+    var aSum=0,aN=0,rSum=0,rN=0;
+    ITEMS.forEach(function(it,i){
+      if(it.axis==="A"){aSum+=answers[i];aN++} else {rSum+=answers[i];rN++}
+    });
+    var A=aSum/aN, R=rSum/rN;            // 1..8 each
+    var tells=A>=4.5, shows=R>=4.5;
+    var style = !tells && !shows ? "Analytical"
+              :  tells && !shows ? "Driving"
+              : !tells &&  shows ? "Amiable"
+              : "Expressive";
+    var s=STYLES[style];
+    var name=($("#name").value||"").trim();
+
+    // header
+    $("#resultFor").textContent = name ? name.toUpperCase()+" — YOUR RESULT" : "";
+    $("#styleName").textContent=style;
+    $("#styleName").style.color=s.color;
+    $("#styleTag").textContent=s.tag;
+    $("#styleBlurb").textContent=s.blurb;
+    $("#watchouts").textContent=s.watchouts;
+
+    // chips + tips
+    $("#strengths").innerHTML=s.strengths.map(function(x){return '<span class="chip">'+x+'</span>'}).join("");
+    $("#tips").innerHTML=s.tips.map(function(x){return '<li>'+x+'</li>'}).join("");
+
+    // scores
+    $("#aVal").textContent=A.toFixed(1)+" / 8";
+    $("#rVal").textContent=R.toFixed(1)+" / 8";
+    $("#aDesc").textContent= tells ? "You lean toward telling" : "You lean toward asking";
+    $("#rDesc").textContent= shows ? "You lean toward showing emotion" : "You lean toward controlling emotion";
+
+    // highlight winning quadrant
+    document.querySelectorAll(".quad").forEach(function(q){
+      q.classList.toggle("win", q.dataset.style===style);
+    });
+
+    // plot marker: x = assertiveness (1..8 -> 0..100), y = responsiveness (low=top)
+    var x=(A-1)/7*100, y=(R-1)/7*100;
+    var m=$("#marker");
+    m.style.left=x+"%";
+    m.style.top=y+"%";
+    m.style.background=s.color;
+    m.style.color=s.color;
+
+    RESULT={style:style, A:A, R:R, name:name, s:s};
+    show("results");
+    requestAnimationFrame(function(){setTimeout(function(){m.classList.add("show")},80)});
+  }
+
+  // ---- summary text (for copy + email) ----
+  function summaryText(){
+    if(!RESULT) return "";
+    var L=[];
+    L.push("Social Style result"+(RESULT.name?" — "+RESULT.name:""));
+    L.push("Style: "+RESULT.style);
+    L.push("Assertiveness: "+RESULT.A.toFixed(1)+"/8 ("+(RESULT.A>=4.5?"tells":"asks")+")");
+    L.push("Responsiveness: "+RESULT.R.toFixed(1)+"/8 ("+(RESULT.R>=4.5?"shows emotion":"controls emotion")+")");
+    L.push("");
+    L.push(RESULT.s.tag);
+    L.push("");
+    L.push("Work best with me: "+RESULT.s.tips.join("; ")+".");
+    return L.join("\n");
+  }
+
+  $("#copy").addEventListener("click",function(){
+    var t=summaryText();
+    var btn=this;
+    navigator.clipboard.writeText(t).then(function(){
+      var o=btn.textContent;btn.textContent="✓ Copied";
+      setTimeout(function(){btn.textContent=o},1600);
+    }).catch(function(){
+      window.prompt("Copy your result:",t);
+    });
+  });
+
+  $("#email").addEventListener("click",function(){
+    if(!RESULT) return;
+    var subj="Social Style result"+(RESULT.name?" — "+RESULT.name:"");
+    var body=summaryText();
+    window.location.href="mailto:"+encodeURIComponent(SEND_RESULTS_TO)+
+      "?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
+  });
+
+  $("#print").addEventListener("click",function(){window.print()});
+
+  updateProgress();
+})();
+</script>
+</body>
+</html>
